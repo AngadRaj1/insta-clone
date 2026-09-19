@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: insta_user
+      POSTGRES_PASSWORD: super_secure_password
+      POSTGRES_DB: instagram_db
+    ports:
+      - "5433:5432"
+    volumes:
+      # This ensures database data survives if the container restarts
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Notice the URL host is now 'db' (the name of the service above), not 'localhost'
+      - DATABASE_URL=postgresql+asyncpg://insta_user:super_secure_password@db:5432/instagram_db
+    volumes:
+      # This links the uploads folder to your host machine so images aren't lost on restart
+      - ./uploads:/app/uploads
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
