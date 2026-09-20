@@ -30,6 +30,22 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     return token
 
 
+@router.post(
+    "/logout",
+    status_code=status.HTTP_200_OK,
+    summary="Log out the current user",
+)
+async def logout(current_user: User = Depends(get_current_user)):
+    """
+    Logs out the authenticated user.
+    Because JWTs are stateless, client applications must delete
+    the stored access token from localStorage/storage upon receiving this response.
+    """
+    return {
+        "detail": f"Successfully logged out user {current_user.username}",
+        "action": "clear_local_token",
+    }
+
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     """
