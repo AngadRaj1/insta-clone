@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
-from app.core.security import SECRET_KEY, ALGORITHM
 from app.domains.users.models import User, RevokedToken
 from app.domains.users.repository import UserRepository
 from app.core.config import settings
