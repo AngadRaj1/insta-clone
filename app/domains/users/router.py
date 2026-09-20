@@ -1,13 +1,16 @@
 import uuid
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
-from app.domains.users.models import User
+from app.domains.users.models import User, RevokedToken
 from app.domains.users.schemas import UserCreate, UserResponse
 from app.domains.users.service import UserService
 from fastapi.security import OAuth2PasswordRequestForm
 from app.domains.users.schemas import Token
-from app.domains.users.dependencies import get_current_user
+from app.domains.users.dependencies import get_current_user, oauth2_scheme
+import jwt
+from app.core.config import settings
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -30,21 +33,56 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     return token
 
 
+# @router.post(
+#     "/logout",
+#     status_code=status.HTTP_200_OK,
+#     summary="Log out the current user",
+# )
+# async def logout(current_user: User = Depends(get_current_user)):
+#     """
+#     Logs out the authenticated user.
+#     Because JWTs are stateless, client applications must delete
+#     the stored access token from localStorage/storage upon receiving this response.
+#     """
+#     return {
+#         "detail": f"Successfully logged out user {current_user.username}",
+#         "action": "clear_local_token",
+#     }
+
+
 @router.post(
     "/logout",
     status_code=status.HTTP_200_OK,
-    summary="Log out the current user",
+    summary="Log out and invalidate current token",
 )
-async def logout(current_user: User = Depends(get_current_user)):
-    """
-    Logs out the authenticated user.
-    Because JWTs are stateless, client applications must delete
-    the stored access token from localStorage/storage upon receiving this response.
-    """
-    return {
-        "detail": f"Successfully logged out user {current_user.username}",
-        "action": "clear_local_token",
-    }
+async def logout(
+    current_user: User = Depends(get_current_user),
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+):
+    """Invalidates the caller's JWT by adding it to the server-side blocklist."""
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        exp_timestamp = payload.get("exp")
+        expires_at = (
+            datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+            if exp_timestamp
+            else datetime.utcnow()
+        )
+    except jwt.PyJWTError:
+        expires_at = datetime.utcnow()
+
+    # Save token to blocklist
+    revoked_entry = RevokedToken(token=token, expires_at=expires_at)
+    db.add(revoked_entry)
+    await db.commit()
+
+    return {"detail": "Successfully logged out and token invalidated."}
+
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):

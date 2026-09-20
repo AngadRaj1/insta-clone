@@ -54,3 +54,12 @@ class User(Base):
     
     # A user can like many posts (we don't strictly need a back_populates here, just a simple list is fine)
     likes = relationship("Like", cascade="all, delete-orphan")
+
+
+class RevokedToken(Base):
+    __tablename__ = "revoked_tokens"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    token = Column(String, unique=True, index=True, nullable=False)
+    revoked_at = Column(DateTime, default=func.now(), nullable=False)
+    expires_at = Column(DateTime, nullable=False)

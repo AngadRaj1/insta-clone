@@ -18,6 +18,7 @@ h11==0.16.0
 httptools==0.8.0
 idna==3.19
 jmespath==1.1.0
+jwt==1.4.0
 Mako==1.4.1
 MarkupSafe==3.0.3
 passlib==1.7.4
