@@ -5,6 +5,7 @@ from app.domains.users.router import router as users_router # user_router
 from app.domains.posts.router import router as posts_router # post_router
 from app.domains.interactions.router import router as interactions_router
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 # This context manager handles startup and shutdown events
 @asynccontextmanager
@@ -20,6 +21,14 @@ app = FastAPI(
     description="A high-performance asynchronous backend for a social media app.",
     version="1.0.0",
     lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Change this to your frontend's URL later for security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
