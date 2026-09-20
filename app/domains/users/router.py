@@ -9,7 +9,7 @@ from app.domains.users.service import UserService
 from fastapi.security import OAuth2PasswordRequestForm
 from app.domains.users.schemas import Token
 from app.domains.users.dependencies import get_current_user, oauth2_scheme
-import jwt
+from jose import jwt, JWTError
 from app.core.config import settings
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -73,7 +73,7 @@ async def logout(
             if exp_timestamp
             else datetime.utcnow()
         )
-    except jwt.PyJWTError:
+    except JWTError:
         expires_at = datetime.utcnow()
 
     # Save token to blocklist
