@@ -65,7 +65,7 @@ async def get_posts(
         )
         .outerjoin(Like, Like.post_id == Post.id)
         .outerjoin(Comment, Comment.post_id == Post.id)
-        .options(selectinload(Post.owner)) # Ensure the user data loads
+        .options(selectinload(Post.author)) # Ensure the user data loads
         .group_by(Post.id)
         .order_by(Post.created_at.desc())
     )
