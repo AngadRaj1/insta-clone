@@ -85,7 +85,7 @@ async def get_posts(
 
         # Convert the SQLAlchemy model to a dictionary
         post_data = post.__dict__.copy()
-        post_data["owner"] = post.owner
+        post_data["author"] = post.author
         post_data["likes_count"] = likes_count
         post_data["comments_count"] = comments_count
         post_data["is_liked"] = is_liked
