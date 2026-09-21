@@ -12,12 +12,17 @@ class PostResponse(BaseModel):
     image_url: str
     caption: str | None
     created_at: datetime
+    author: dict
+
+    likes_count: int = 0
+    comments_count: int = 0
+    is_liked: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
 
-
-# Add this to the bottom of app/domains/posts/schemas.py
+class Config:
+        from_attributes = True
 
 class PostAuthor(BaseModel):
     id: uuid.UUID
