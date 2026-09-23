@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 import uuid
 from datetime import datetime
+from app.domains.users.schemas import UserResponse
 
 class PostCreate(BaseModel):
     image_url: str
@@ -12,7 +13,7 @@ class PostResponse(BaseModel):
     image_url: str
     caption: str | None
     created_at: datetime
-    author: dict
+    author: UserResponse
 
     likes_count: int = 0
     comments_count: int = 0

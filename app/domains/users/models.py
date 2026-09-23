@@ -11,6 +11,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 follows = Table(
     "follows",
     Base.metadata,
+    
+    Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
     Column("follower_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
     Column("followee_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
     Column("created_at", DateTime(timezone=True), server_default=func.now())
